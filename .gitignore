@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.sqlite
+.env
+venv/
+env/
+static/uploads/*
+!static/uploads/.gitkeep
