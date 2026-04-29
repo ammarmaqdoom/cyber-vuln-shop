@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Order History</h1>
+{% if orders %}
+<ul>
+  {% for order in orders %}
+  <li>Order #{{ order.id }} | Date: {{ order.created_at }} | Items: {{ order.items|length }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No orders found.</p>
+{% endif %}
+{% endblock %}

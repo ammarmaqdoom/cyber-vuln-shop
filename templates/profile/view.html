@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Profile</h1>
+<form action="{{ url_for('profile.update_profile') }}" method="POST">
+  <label>Username: <input type="text" name="username" value="{{ user.username }}"></label><br><br>
+  <label>Email: <input type="email" name="email" value="{{ user.email }}"></label><br><br>
+  <button type="submit">Update Profile</button>
+</form>
+<hr>
+<h2>Upload File</h2>
+<form action="{{ url_for('profile.upload_file') }}" method="POST" enctype="multipart/form-data">
+  <input type="file" name="file">
+  <button type="submit">Upload</button>
+</form>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, msg in messages %}
+      <p class="{{ 'text-success' if category == 'success' else 'text-danger' }}">{{ msg }}</p>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<br><a href="{{ url_for('profile.order_history') }}">View Order History</a>
+{% endblock %}
