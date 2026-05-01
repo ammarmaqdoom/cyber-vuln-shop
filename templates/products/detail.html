@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card">
+    <div style="display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:start;">
+        <div>
+            <p style="margin:0 0 6px; color:#64748b;">{{ product.category }}</p>
+            <h1 style="margin:0 0 10px;">{{ product.name }}</h1>
+            <p style="margin:0; color:#334155; line-height:1.6;">{{ product.description }}</p>
+        </div>
+        <div style="min-width:160px; text-align:right;">
+            <div style="font-size:1.6rem; font-weight:700;">${{ '%.2f'|format(product.price) }}</div>
+            <div style="color:#475569;">Stock: {{ product.stock }}</div>
+        </div>
+    </div>
+
+    <section style="margin-top:28px;">
+        <h2 style="margin:0 0 12px;">Reviews</h2>
+
+        {% if reviews %}
+            <div style="display:grid; gap:12px;">
+                {% for review in reviews %}
+                    <article style="border:1px solid #e2e8f0; border-radius:10px; padding:14px; background:#fff;">
+                        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                            <strong>{{ review.author.username }}</strong>
+                            <span>{{ review.rating }}/5</span>
+                        </div>
+                        <p style="margin:10px 0 0; color:#334155; line-height:1.5;">{{ review.text }}</p>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No reviews yet.</p>
+        {% endif %}
+    </section>
+
+    <section style="margin-top:28px;">
+        <h2 style="margin:0 0 12px;">Add a review</h2>
+
+        {% if current_user.is_authenticated %}
+            <form method="post" action="{{ url_for('products.add_review', product_id=product.id) }}">
+                <label for="rating">Rating</label>
+                <input id="rating" name="rating" type="number" min="1" max="5" step="1" required>
+
+                <label for="text">Review</label>
+                <input id="text" name="text" placeholder="Share your thoughts" required>
+
+                <button type="submit">Submit review</button>
+            </form>
+        {% else %}
+            <p><a href="{{ url_for('auth.login') }}">Log in</a> to submit a review.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
