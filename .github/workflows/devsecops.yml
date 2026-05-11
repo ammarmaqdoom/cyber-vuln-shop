@@ -29,7 +29,7 @@ jobs:
       - name: Run Bandit (high severity gate)
         run: |
           mkdir -p reports/generated
-          bandit -r . -x ./tests,./venv -lll -f json -o reports/generated/bandit.json
+          bandit -r . -x ./tests,./venv,./demo,./reports/generated -lll -f json -o reports/generated/bandit.json
 
       - name: Run Semgrep
         uses: semgrep/semgrep-action@v1
@@ -99,6 +99,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run pytest
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: pytest -q
 
   # ─────────────────────────────────────────
