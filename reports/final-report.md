@@ -81,18 +81,39 @@ Workflow file: `.github/workflows/devsecops.yml`
 
 Detailed exploitation notes: [../Exploitation/ExploitationReport.md](../Exploitation/ExploitationReport.md)
 
+### 5.1 GitHub Issue, Branch, PR, and Test Traceability
+
+Each vulnerability was re-validated using the required course workflow: issue, dedicated branch, unit test file, pushed branch, pull request, merge, manual evidence, and report update.
+
+| ID | Issue | Branch | PR | Regression Test |
+| --- | --- | --- | --- | --- |
+| VULN-01 | [#1](https://github.com/ammarmaqdoom/cyber-vuln-shop/issues/1) | `fix/vuln-01-rbac-validation` | [#11](https://github.com/ammarmaqdoom/cyber-vuln-shop/pull/11) | `tests/test_vuln_01_rbac.py` |
+| VULN-02 | [#2](https://github.com/ammarmaqdoom/cyber-vuln-shop/issues/2) | `fix/vuln-02-csrf-validation` | [#12](https://github.com/ammarmaqdoom/cyber-vuln-shop/pull/12) | `tests/test_vuln_02_csrf.py` |
+| VULN-03 | [#3](https://github.com/ammarmaqdoom/cyber-vuln-shop/issues/3) | `fix/vuln-03-open-redirect-validation` | [#13](https://github.com/ammarmaqdoom/cyber-vuln-shop/pull/13) | `tests/test_vuln_03_open_redirect.py` |
+| VULN-04 | [#4](https://github.com/ammarmaqdoom/cyber-vuln-shop/issues/4) | `fix/vuln-04-sqli-validation` | [#14](https://github.com/ammarmaqdoom/cyber-vuln-shop/pull/14) | `tests/test_vuln_04_sqli.py` |
+| VULN-05 | [#5](https://github.com/ammarmaqdoom/cyber-vuln-shop/issues/5) | `fix/vuln-05-xss-validation` | [#15](https://github.com/ammarmaqdoom/cyber-vuln-shop/pull/15) | `tests/test_vuln_05_xss.py` |
+| VULN-06 | [#6](https://github.com/ammarmaqdoom/cyber-vuln-shop/issues/6) | `fix/vuln-06-idor-validation` | [#16](https://github.com/ammarmaqdoom/cyber-vuln-shop/pull/16) | `tests/test_vuln_06_idor.py` |
+| VULN-07 | [#7](https://github.com/ammarmaqdoom/cyber-vuln-shop/issues/7) | `fix/vuln-07-debug-endpoint-validation` | [#17](https://github.com/ammarmaqdoom/cyber-vuln-shop/pull/17) | `tests/test_vuln_07_debug_endpoint.py` |
+| VULN-08 | [#8](https://github.com/ammarmaqdoom/cyber-vuln-shop/issues/8) | `fix/vuln-08-user-dump-validation` | [#18](https://github.com/ammarmaqdoom/cyber-vuln-shop/pull/18) | `tests/test_vuln_08_user_dump.py` |
+| VULN-09 | [#9](https://github.com/ammarmaqdoom/cyber-vuln-shop/issues/9) | `fix/vuln-09-db-export-validation` | [#19](https://github.com/ammarmaqdoom/cyber-vuln-shop/pull/19) | `tests/test_vuln_09_db_export.py` |
+| VULN-10 | [#10](https://github.com/ammarmaqdoom/cyber-vuln-shop/issues/10) | `fix/vuln-10-weak-password-validation` | [#20](https://github.com/ammarmaqdoom/cyber-vuln-shop/pull/20) | `tests/test_vuln_10_weak_password.py` |
+
 ## 6. Exploitation Evidence
 
 Live demo runbook: [live-demo-runbook.md](live-demo-runbook.md)
 
 Evidence captured for the final PDF/slides:
 
-- Screenshot of `alice` denied from `/admin`.
-- Screenshot of `admin` accessing `/admin`.
-- Screenshot or request showing pre-fix CSRF concept and post-fix CSRF rejection.
-- Screenshot of cart checkout creating an order.
-- GitHub Actions run `25667361027` showing SAST/SCA/tests/DAST completed successfully.
-- Downloaded ZAP HTML report.
+- 17 vulnerability proof screenshots captured under `../Exploitation/Proofs/`.
+- Pipeline evidence screenshots captured under `reports/evidence/`.
+- GitHub Actions run [`25698381062`](https://github.com/ammarmaqdoom/cyber-vuln-shop/actions/runs/25698381062) completed successfully with SAST, SCA, regression tests, and DAST.
+- Workflow artifacts `sast-reports`, `sca-reports`, and `dast-reports` were uploaded and downloaded locally to `reports/generated/run-25698381062/`.
+
+Pipeline screenshots:
+
+- <img src="evidence/pipeline-01-triggered-live.png" alt="Live workflow dispatch trigger evidence" width="420">
+- <img src="evidence/pipeline-02-completed-run.png" alt="Completed DevSecOps pipeline run evidence" width="420">
+- <img src="evidence/pipeline-03-artifacts.png" alt="Uploaded security artifact evidence" width="420">
 
 | Finding | Vulnerable Evidence | Fix Evidence |
 | --- | --- | --- |
