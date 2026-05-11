@@ -32,7 +32,8 @@ Key business risks found during review were broken admin access control, missing
 
 ## 3. Architecture and Threat Model
 
-Full threat model: [threat-model.md](threat-model.md)
+Full threat model: [../Threat Model/ThreatModel.md](../Threat%20Model/ThreatModel.md)  
+Microsoft Threat Modeling Tool file: [../Threat Model/ThreatModel.tm7](../Threat%20Model/ThreatModel.tm7)
 
 ```mermaid
 flowchart LR
@@ -67,33 +68,44 @@ Workflow file: `.github/workflows/devsecops.yml`
 
 | ID | Vulnerability | Severity | OWASP | Status |
 | --- | --- | --- | --- | --- |
-| EXP-01 | Broken admin authorization | High | A01 Broken Access Control | Fixed |
-| EXP-02 | Missing CSRF protection | High | A01 Broken Access Control | Fixed |
-| EXP-03 | Unsafe login redirect | Medium | A01/A10 | Fixed |
-| EXP-04 | Broken cart/checkout persistence | Medium | A04 Insecure Design | Fixed |
-| EXP-05 | Missing security pipeline gates | Medium | A06 Vulnerable Components | Fixed |
+| VULN-01 | Broken RBAC on admin pages | High | A01 Broken Access Control | Fixed |
+| VULN-02 | Missing CSRF protection | High | A01 Broken Access Control | Fixed |
+| VULN-03 | Open redirect on login `next` | Medium | A01/A10 | Fixed |
+| VULN-04 | SQL injection on product search | Critical | A03 Injection | Fixed |
+| VULN-05 | Stored XSS in product reviews | High | A03 Injection | Fixed |
+| VULN-06 | IDOR on order details | High | A01 Broken Access Control | Fixed |
+| VULN-07 | Debug endpoint leaks secrets | Critical | A05 Security Misconfiguration | Fixed |
+| VULN-08 | Unauthenticated user dump with weak hashes | Critical | A02 Cryptographic Failures | Fixed |
+| VULN-09 | Unauthenticated database export | Critical | A01 Broken Access Control | Fixed |
+| VULN-10 | Weak password accepted | High | A07 Identification and Authentication Failures | Fixed |
 
-Detailed exploitation notes: [exploitation-report.md](exploitation-report.md)
+Detailed exploitation notes: [../Exploitation/ExploitationReport.md](../Exploitation/ExploitationReport.md)
 
 ## 6. Exploitation Evidence
 
 Live demo runbook: [live-demo-runbook.md](live-demo-runbook.md)
 
-Evidence to include in final PDF/slides after running the demo:
+Evidence captured for the final PDF/slides:
 
 - Screenshot of `alice` denied from `/admin`.
 - Screenshot of `admin` accessing `/admin`.
 - Screenshot or request showing pre-fix CSRF concept and post-fix CSRF rejection.
 - Screenshot of cart checkout creating an order.
-- GitHub Actions run showing SAST/SCA/DAST jobs.
+- GitHub Actions run `25667361027` showing SAST/SCA/tests/DAST completed successfully.
 - Downloaded ZAP HTML report.
 
 | Finding | Vulnerable Evidence | Fix Evidence |
 | --- | --- | --- |
-| Broken RBAC | `reports/evidence/rbac-01-vulnerable-alice-admin.png` | `reports/evidence/rbac-02-fixed-alice-denied.png`, `reports/evidence/rbac-03-fixed-admin-allowed.png` |
-| CSRF profile update | `reports/evidence/csrf-01-vulnerable-profile-changed.png` | `reports/evidence/csrf-02-fixed-forbidden.png` |
-| Open redirect | `reports/evidence/redirect-01-vulnerable-external.png` | `reports/evidence/redirect-02-fixed-local.png` |
-| Pipeline evidence | `reports/evidence/pipeline-01-triggered-live.png` | `reports/evidence/pipeline-02-completed-run.png`, `reports/evidence/pipeline-03-artifacts.png` |
+| Broken RBAC | `../Exploitation/Proofs/rbac-01-vulnerable-alice-admin.png` | `../Exploitation/Proofs/rbac-02-fixed-alice-denied.png`, `../Exploitation/Proofs/rbac-03-fixed-admin-allowed.png` |
+| CSRF profile update | `../Exploitation/Proofs/csrf-01-vulnerable-profile-changed.png` | `../Exploitation/Proofs/csrf-02-fixed-forbidden.png` |
+| Open redirect | `../Exploitation/Proofs/redirect-01-vulnerable-external.png` | `../Exploitation/Proofs/redirect-02-fixed-local.png` |
+| SQL injection | `../Exploitation/Proofs/sqli-01-vulnerable-email-leak.png` | `../Exploitation/Proofs/sqli-02-fixed-no-leak.png` |
+| Stored XSS | `../Exploitation/Proofs/xss-01-vulnerable-script-tag.png` | `../Exploitation/Proofs/xss-02-fixed-escaped.png` |
+| IDOR | `../Exploitation/Proofs/idor-01-vulnerable-other-order.png` | Ownership check re-tested in `tests/test_security_baseline.py` and documented in remediation report |
+| Debug endpoint | `../Exploitation/Proofs/debug-01-vulnerable-secrets.png` | Endpoint absent from fixed app; DAST run passed high-risk gate |
+| User dump / weak hashes | `../Exploitation/Proofs/userdump-01-vulnerable-md5.png` | Endpoint absent from fixed app; SAST/SCA/tests passed |
+| Bulk database export | `../Exploitation/Proofs/export-01-vulnerable-bulk-dump.png` | Endpoint absent from fixed app; DAST run passed high-risk gate |
+| Weak password policy | `../Exploitation/Proofs/weakpwd-01-vulnerable-accepted.png` | `../Exploitation/Proofs/weakpwd-02-fixed-rejected.png` |
 
 ## 7. Remediation and Re-Test
 
@@ -111,11 +123,9 @@ Use Docker Compose with generated self-signed certificates for the graded HTTPS 
 
 | Member | Ownership Area | Evidence |
 | --- | --- | --- |
-| Member 1 | Flask app, database, CRUD, RBAC | App commits and demo |
-| Member 2 | Docker, CI/CD, SAST/SCA/DAST | Workflow commits and artifacts |
-| Member 3 | Threat model, exploitation, remediation report | Report commits and presentation |
-
-Update this table with real names before final PDF submission.
+| Ikramah Elahi ([@ikramahelahi](https://github.com/ikramahelahi)) | Flask app, database, CRUD, RBAC, validation, templates | Working app demo, `routes/`, `models.py`, templates, regression tests |
+| Ammar Maqdoom ([@ammarmaqdoom](https://github.com/ammarmaqdoom)) | Docker, HTTPS, CI/CD, SAST/SCA/DAST tooling | `.github/workflows/devsecops.yml`, `Dockerfile`, `docker-compose.yml`, Nginx config, Actions artifacts |
+| Muhammad Mustafa ([@huMustafa](https://github.com/huMustafa)) | Threat model, exploitation, remediation report, final presentation | `Threat Model/`, `Exploitation/`, `reports/`, proof screenshots |
 
 ## 10. Appendices
 
