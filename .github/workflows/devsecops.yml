@@ -1,0 +1,146 @@
+name: DevSecOps Pipeline
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+  # ─────────────────────────────────────────
+  # SAST : Static Application Security Testing
+  # ─────────────────────────────────────────
+  sast:
+    name: SAST - Bandit and Semgrep
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit (high severity gate)
+        run: |
+          mkdir -p reports/generated
+          bandit -r . -x ./tests,./venv -lll -f json -o reports/generated/bandit.json
+
+      - name: Run Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/python
+            p/flask
+        continue-on-error: true
+
+      - name: Upload SAST artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-reports
+          path: reports/generated/
+
+  # ─────────────────────────────────────────
+  # SCA : Software Composition Analysis
+  # ─────────────────────────────────────────
+  sca:
+    name: SCA - pip-audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Run pip-audit (fails on vulnerable dependencies)
+        run: |
+          mkdir -p reports/generated
+          pip-audit -r requirements.txt --format json --output reports/generated/pip-audit.json
+
+      - name: Upload SCA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sca-reports
+          path: reports/generated/
+
+  # ─────────────────────────────────────────
+  # Tests : Regression suite (security + functional)
+  # ─────────────────────────────────────────
+  tests:
+    name: Regression Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run pytest
+        run: pytest -q
+
+  # ─────────────────────────────────────────
+  # DAST : Dynamic Application Security Testing
+  # ─────────────────────────────────────────
+  dast:
+    name: DAST - OWASP ZAP Baseline
+    runs-on: ubuntu-latest
+    needs: [sast, sca, tests]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build application image
+        run: docker build -t cyber-vuln-shop:ci .
+
+      - name: Run application container
+        run: |
+          docker run -d --name cyber-vuln-shop-ci \
+            -p 5000:5000 \
+            -e SECRET_KEY=ci-secret-key \
+            cyber-vuln-shop:ci
+
+      - name: Wait for application health check
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:5000/healthz; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs cyber-vuln-shop-ci
+          exit 1
+
+      - name: Run OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: "http://127.0.0.1:5000"
+          fail_action: false
+          artifact_name: dast-zap-report
+          cmd_options: "-a"
+
+      - name: Stop application container
+        if: always()
+        run: docker rm -f cyber-vuln-shop-ci || true

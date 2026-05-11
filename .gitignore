@@ -1,9 +1,13 @@
 __pycache__/
+.pytest_cache/
 *.pyc
 *.pyo
 *.db
 *.sqlite
 .env
+certs/*.pem
+certs/*.key
+reports/generated/
 venv/
 env/
 static/uploads/*

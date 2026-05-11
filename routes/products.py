@@ -11,6 +11,7 @@ products_bp = Blueprint('products', __name__, url_prefix='/products')
 @products_bp.route('/')
 def list_products():
 	query = request.args.get('q', '').strip()
+	category = request.args.get('category', '').strip()
 	products_query = Product.query
 
 	if query:
@@ -22,9 +23,14 @@ def list_products():
 				Product.category.ilike(search_term),
 			)
 		)
+	if category:
+		products_query = products_query.filter(Product.category == category)
 
 	products = products_query.order_by(Product.created_at.desc()).all()
-	return render_template('products/list.html', products=products, q=query)
+	categories = [
+		row[0] for row in Product.query.with_entities(Product.category).distinct().order_by(Product.category).all()
+	]
+	return render_template('products/list.html', products=products, q=query, category=category, categories=categories)
 
 
 @products_bp.route('/<int:product_id>')
@@ -53,6 +59,9 @@ def add_review(product_id):
 
 	if not text:
 		flash('Review text is required.', 'danger')
+		return redirect(url_for('products.product_detail', product_id=product.id))
+	if len(text) > 1000:
+		flash('Review text must be 1000 characters or fewer.', 'danger')
 		return redirect(url_for('products.product_detail', product_id=product.id))
 
 	review = Review(

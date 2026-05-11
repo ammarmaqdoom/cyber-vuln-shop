@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CSRF Attack Against Fixed App</title>
+</head>
+<body>
+  <h1>CSRF Attack Re-Test</h1>
+  <p>This submits the same forged profile update to the fixed app on port 5000. It should fail because no CSRF token is present.</p>
+  <form id="csrf" method="post" action="http://127.0.0.1:5000/profile/update">
+    <input type="hidden" name="username" value="csrf_should_fail">
+    <input type="hidden" name="email" value="csrf-fail@example.com">
+  </form>
+  <script>
+    document.getElementById('csrf').submit();
+  </script>
+</body>
+</html>

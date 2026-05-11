@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+from urllib.parse import urljoin, urlparse
+import re
 
 import bcrypt
 from flask import Blueprint, flash, redirect, render_template, request, url_for
@@ -10,11 +12,20 @@ from models import User
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+USERNAME_RE = re.compile(r'^[A-Za-z0-9_]{3,30}$')
+EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+
+
+def is_safe_redirect(target):
+	ref_url = urlparse(request.host_url)
+	test_url = urlparse(urljoin(request.host_url, target or ''))
+	return test_url.scheme in {'http', 'https'} and ref_url.netloc == test_url.netloc
+
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
 	if current_user.is_authenticated:
-		return redirect(url_for('auth.login'))
+		return redirect(url_for('products.list_products'))
 
 	if request.method == 'POST':
 		username = request.form.get('username', '').strip()
@@ -23,6 +34,15 @@ def register():
 
 		if not username or not email or not password:
 			flash('Username, email, and password are required.', 'danger')
+			return render_template('auth/register.html')
+		if not USERNAME_RE.match(username):
+			flash('Username must be 3-30 characters and use only letters, numbers, or underscores.', 'danger')
+			return render_template('auth/register.html')
+		if not EMAIL_RE.match(email):
+			flash('Enter a valid email address.', 'danger')
+			return render_template('auth/register.html')
+		if len(password) < 8:
+			flash('Password must be at least 8 characters.', 'danger')
 			return render_template('auth/register.html')
 
 		existing_user = User.query.filter(
@@ -46,7 +66,7 @@ def register():
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
 	if current_user.is_authenticated:
-		return render_template('auth/login.html')
+		return redirect(url_for('products.list_products'))
 
 	if request.method == 'POST':
 		username_or_email = request.form.get('username', '').strip()
@@ -85,15 +105,17 @@ def login():
 		user.locked_until = None
 		db.session.commit()
 
-		login_user(user)
+		login_user(user, remember=False)
 		flash('Logged in successfully.', 'success')
 		next_url = request.args.get('next')
-		return redirect(next_url or url_for('auth.login'))
+		if next_url and is_safe_redirect(next_url):
+			return redirect(next_url)
+		return redirect(url_for('products.list_products'))
 
 	return render_template('auth/login.html')
 
 
-@auth_bp.route('/logout')
+@auth_bp.route('/logout', methods=['POST'])
 @login_required
 def logout():
 	logout_user()

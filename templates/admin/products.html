@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1>Manage Products</h1>
+  <p class="muted">Admin CRUD area. Create, update, and delete catalog records stored in the database.</p>
+
+  <h2>Create Product</h2>
+  <form method="post" action="{{ url_for('admin.create_product') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Name</label>
+    <input name="name" required>
+    <label>Description</label>
+    <textarea name="description" required></textarea>
+    <label>Category</label>
+    <input name="category" value="General">
+    <label>Price</label>
+    <input name="price" type="number" min="0" step="0.01" required>
+    <label>Stock</label>
+    <input name="stock" type="number" min="0" step="1" required>
+    <label>Image URL</label>
+    <input name="image_url" value="placeholder.png">
+    <button type="submit">Create Product</button>
+  </form>
+</div>
+
+<div class="card" style="margin-top:16px;">
+  <h2>Existing Products</h2>
+  <table>
+    <tr><th>ID</th><th>Product</th><th>Price</th><th>Stock</th><th>Update</th><th>Delete</th></tr>
+    {% for product in products %}
+      <tr>
+        <td>{{ product.id }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.update_product', product_id=product.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label>Name</label>
+            <input name="name" value="{{ product.name }}" required>
+            <label>Description</label>
+            <textarea name="description" required>{{ product.description }}</textarea>
+            <label>Category</label>
+            <input name="category" value="{{ product.category }}">
+            <label>Image URL</label>
+            <input name="image_url" value="{{ product.image_url }}">
+        </td>
+        <td><input name="price" type="number" min="0" step="0.01" value="{{ product.price }}" required></td>
+        <td><input name="stock" type="number" min="0" step="1" value="{{ product.stock }}" required></td>
+        <td>
+            <button type="submit">Update</button>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="{{ url_for('admin.delete_product', product_id=product.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="danger-button" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
