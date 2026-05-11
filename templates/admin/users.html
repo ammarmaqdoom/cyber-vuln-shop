@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1>Manage Users</h1>
+  <p class="muted">Admin-only page for reviewing users and changing roles.</p>
+  <table>
+    <tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Action</th></tr>
+    {% for user in users %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.update_user_role', user_id=user.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select name="role">
+              <option value="user" {% if user.role == 'user' %}selected{% endif %}>user</option>
+              <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>admin</option>
+            </select>
+            <button type="submit">Save Role</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

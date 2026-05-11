@@ -1,7 +1,6 @@
-from extensions import db
+from extensions import db, login_manager
 from flask_login import UserMixin
 from datetime import datetime
-from app import login_manager
 
 
 @login_manager.user_loader
@@ -24,6 +23,7 @@ class User(db.Model, UserMixin):
     orders = db.relationship('Order', backref='customer', lazy=True)
     reviews = db.relationship('Review', backref='author', lazy=True)
 
+    @property
     def is_admin(self):
         return self.role == 'admin'
 
@@ -41,6 +41,27 @@ class Product(db.Model):
 
     order_items = db.relationship('OrderItem', backref='product', lazy=True)
     reviews = db.relationship('Review', backref='product', lazy=True)
+    cart_items = db.relationship('CartItem', backref='product', lazy=True)
+
+
+class Cart(db.Model):
+    __tablename__ = 'carts'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = db.relationship('User', backref=db.backref('cart', uselist=False))
+    items = db.relationship('CartItem', backref='cart', lazy=True, cascade='all, delete-orphan')
+
+
+class CartItem(db.Model):
+    __tablename__ = 'cart_items'
+    id = db.Column(db.Integer, primary_key=True)
+    cart_id = db.Column(db.Integer, db.ForeignKey('carts.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Order(db.Model):

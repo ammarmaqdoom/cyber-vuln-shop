@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from app.models import db, Cart, CartItem, Order, OrderItem, Product
+from extensions import db
+from models import Cart, CartItem, Order, OrderItem, Product
 from datetime import datetime
 
 cart_bp = Blueprint('cart', __name__)
@@ -21,6 +22,10 @@ def view_cart():
 @login_required
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
+    if product.stock < 1:
+        flash('This product is out of stock.', 'warning')
+        return redirect(url_for('products.product_detail', product_id=product.id))
+
     cart = Cart.query.filter_by(user_id=current_user.id).first()
     if not cart:
         cart = Cart(user_id=current_user.id)
@@ -29,6 +34,9 @@ def add_to_cart(product_id):
 
     cart_item = CartItem.query.filter_by(cart_id=cart.id, product_id=product.id).first()
     if cart_item:
+        if cart_item.quantity + 1 > product.stock:
+            flash('Not enough stock available.', 'warning')
+            return redirect(url_for('cart.view_cart'))
         cart_item.quantity += 1
     else:
         cart_item = CartItem(cart_id=cart.id, product_id=product.id, quantity=1)
@@ -56,7 +64,14 @@ def update_quantity(item_id):
     if item.cart.user_id != current_user.id:
         flash('Unauthorized', 'danger')
         return redirect(url_for('cart.view_cart'))
-    new_qty = int(request.form.get('quantity', 1))
+    try:
+        new_qty = int(request.form.get('quantity', 1))
+    except ValueError:
+        flash('Quantity must be a valid number.', 'danger')
+        return redirect(url_for('cart.view_cart'))
+    if new_qty > item.product.stock:
+        flash('Requested quantity exceeds available stock.', 'warning')
+        return redirect(url_for('cart.view_cart'))
     if new_qty > 0:
         item.quantity = new_qty
     else:
@@ -70,14 +85,20 @@ def checkout():
     cart = Cart.query.filter_by(user_id=current_user.id).first()
     if not cart:
         flash('Cart is empty', 'warning')
-        return redirect(url_for('products.list'))
+        return redirect(url_for('products.list_products'))
 
     items = CartItem.query.filter_by(cart_id=cart.id).all()
     if not items:
         flash('Cart is empty', 'warning')
-        return redirect(url_for('products.list'))
+        return redirect(url_for('products.list_products'))
 
-    order = Order(user_id=current_user.id, created_at=datetime.utcnow())
+    for item in items:
+        if item.quantity > item.product.stock:
+            flash(f'Not enough stock for {item.product.name}.', 'warning')
+            return redirect(url_for('cart.view_cart'))
+
+    total = sum(item.quantity * item.product.price for item in items)
+    order = Order(user_id=current_user.id, total=total, status='paid', created_at=datetime.utcnow())
     db.session.add(order)
     db.session.flush()
 
@@ -86,8 +107,9 @@ def checkout():
             order_id=order.id,
             product_id=item.product_id,
             quantity=item.quantity,
-            price=item.product.price
+            unit_price=item.product.price
         )
+        item.product.stock -= item.quantity
         db.session.add(order_item)
 
     CartItem.query.filter_by(cart_id=cart.id).delete()

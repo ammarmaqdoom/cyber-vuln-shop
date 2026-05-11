@@ -4,6 +4,7 @@
 <div class="card">
     <h1>Login</h1>
     <form method="post" action="{{ url_for('auth.login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label for="username">Username or Email</label>
         <input id="username" name="username" type="text" required>
 
