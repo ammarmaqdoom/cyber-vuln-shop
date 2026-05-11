@@ -63,4 +63,4 @@ Trust boundaries:
 
 ## 3.4 Updates After Remediation
 
-Every Critical/High threat in this table corresponds to a `fix #N:` commit in the project history. The remediated code in the main branch enforces RBAC, CSRF, redirect validation, parameterised queries, output escaping, ownership checks, scoped admin APIs, and a deny-by-default debug stance. The threat model is re-reviewed after the pipeline goes green to confirm no critical residual risk remains.
+Every Critical/High threat in this table maps to a documented remediation in `Exploitation/ExploitationReport.md` and `reports/remediation-retest.md`. The remediated code in the main branch enforces RBAC, CSRF, redirect validation, parameterised queries, output escaping, ownership checks, scoped admin APIs, and a deny-by-default debug stance. The threat model was re-reviewed after the GitHub Actions DevSecOps pipeline passed.
