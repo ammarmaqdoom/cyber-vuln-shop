@@ -96,16 +96,16 @@ Evidence captured for the final PDF/slides:
 
 | Finding | Vulnerable Evidence | Fix Evidence |
 | --- | --- | --- |
-| Broken RBAC | `../Exploitation/Proofs/rbac-01-vulnerable-alice-admin.png` | `../Exploitation/Proofs/rbac-02-fixed-alice-denied.png`, `../Exploitation/Proofs/rbac-03-fixed-admin-allowed.png` |
-| CSRF profile update | `../Exploitation/Proofs/csrf-01-vulnerable-profile-changed.png` | `../Exploitation/Proofs/csrf-02-fixed-forbidden.png` |
-| Open redirect | `../Exploitation/Proofs/redirect-01-vulnerable-external.png` | `../Exploitation/Proofs/redirect-02-fixed-local.png` |
-| SQL injection | `../Exploitation/Proofs/sqli-01-vulnerable-email-leak.png` | `../Exploitation/Proofs/sqli-02-fixed-no-leak.png` |
-| Stored XSS | `../Exploitation/Proofs/xss-01-vulnerable-script-tag.png` | `../Exploitation/Proofs/xss-02-fixed-escaped.png` |
-| IDOR | `../Exploitation/Proofs/idor-01-vulnerable-other-order.png` | Ownership check re-tested in `tests/test_security_baseline.py` and documented in remediation report |
-| Debug endpoint | `../Exploitation/Proofs/debug-01-vulnerable-secrets.png` | Endpoint absent from fixed app; DAST run passed high-risk gate |
-| User dump / weak hashes | `../Exploitation/Proofs/userdump-01-vulnerable-md5.png` | Endpoint absent from fixed app; SAST/SCA/tests passed |
-| Bulk database export | `../Exploitation/Proofs/export-01-vulnerable-bulk-dump.png` | Endpoint absent from fixed app; DAST run passed high-risk gate |
-| Weak password policy | `../Exploitation/Proofs/weakpwd-01-vulnerable-accepted.png` | `../Exploitation/Proofs/weakpwd-02-fixed-rejected.png` |
+| Broken RBAC | <img src="../Exploitation/Proofs/rbac-01-vulnerable-alice-admin.png" alt="Non-admin user alice can access vulnerable admin dashboard" width="260"> | <img src="../Exploitation/Proofs/rbac-02-fixed-alice-denied.png" alt="Fixed app denies alice admin access" width="260"><br><img src="../Exploitation/Proofs/rbac-03-fixed-admin-allowed.png" alt="Fixed app allows admin user" width="260"> |
+| CSRF profile update | <img src="../Exploitation/Proofs/csrf-01-vulnerable-profile-changed.png" alt="Vulnerable app profile changed by CSRF" width="260"> | <img src="../Exploitation/Proofs/csrf-02-fixed-forbidden.png" alt="Fixed app rejects missing CSRF token" width="260"> |
+| Open redirect | <img src="../Exploitation/Proofs/redirect-01-vulnerable-external.png" alt="Vulnerable login redirects to external site" width="260"> | <img src="../Exploitation/Proofs/redirect-02-fixed-local.png" alt="Fixed login keeps redirect local" width="260"> |
+| SQL injection | <img src="../Exploitation/Proofs/sqli-01-vulnerable-email-leak.png" alt="SQL injection leaks user emails" width="260"> | <img src="../Exploitation/Proofs/sqli-02-fixed-no-leak.png" alt="Fixed search does not leak emails" width="260"> |
+| Stored XSS | <img src="../Exploitation/Proofs/xss-01-vulnerable-script-tag.png" alt="Stored XSS renders attacker-controlled HTML" width="260"> | <img src="../Exploitation/Proofs/xss-02-fixed-escaped.png" alt="Fixed app escapes script payload as text" width="260"> |
+| IDOR | <img src="../Exploitation/Proofs/idor-01-vulnerable-other-order.png" alt="Bob views Alice's order in vulnerable app" width="260"> | Ownership check re-tested in `tests/test_security_baseline.py` and documented in remediation report. |
+| Debug endpoint | <img src="../Exploitation/Proofs/debug-01-vulnerable-secrets.png" alt="Vulnerable debug endpoint leaks secrets" width="260"> | Endpoint absent from fixed app; DAST run passed high-risk gate. |
+| User dump / weak hashes | <img src="../Exploitation/Proofs/userdump-01-vulnerable-md5.png" alt="Unauthenticated user dump leaks weak hashes" width="260"> | Endpoint absent from fixed app; SAST/SCA/tests passed. |
+| Bulk database export | <img src="../Exploitation/Proofs/export-01-vulnerable-bulk-dump.png" alt="Unauthenticated database export leaks application data" width="260"> | Endpoint absent from fixed app; DAST run passed high-risk gate. |
+| Weak password policy | <img src="../Exploitation/Proofs/weakpwd-01-vulnerable-accepted.png" alt="Vulnerable app accepts weak password" width="260"> | <img src="../Exploitation/Proofs/weakpwd-02-fixed-rejected.png" alt="Fixed app rejects weak password" width="260"> |
 
 ## 7. Remediation and Re-Test
 
