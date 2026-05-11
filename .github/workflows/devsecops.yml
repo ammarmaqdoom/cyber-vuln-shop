@@ -136,13 +136,28 @@ jobs:
           exit 1
 
       - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
+        run: |
+          mkdir -p reports/generated
+          chmod -R 777 reports/generated
+          docker run --rm --network=host \
+            -v "${{ github.workspace }}/reports/generated:/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+              -t http://127.0.0.1:5000 \
+              -J zap-report.json \
+              -w zap-report.md \
+              -r zap-report.html \
+              -a || true
+
+      - name: Enforce ZAP high-risk quality gate
+        run: python scripts/check_zap_high.py reports/generated/zap-report.json
+
+      - name: Upload DAST artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          target: "http://127.0.0.1:5000"
-          fail_action: false
-          allow_issue_writing: false
-          artifact_name: zapreport
-          cmd_options: "-a"
+          name: dast-reports
+          path: reports/generated/zap-report.*
 
       - name: Stop application container
         if: always()
